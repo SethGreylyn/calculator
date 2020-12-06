@@ -4,7 +4,7 @@ export class WorkerPool<T, N> {
     private tasks: Task<T, N>[] = [];
     private pool: FlexibleWorker[] = [];
 
-    constructor(public workerSource: string, public poolSize: number) {
+    constructor(private workerSource: string, private poolSize: number) {
         if (this.poolSize < 1) {
             return;
         }
