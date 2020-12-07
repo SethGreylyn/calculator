@@ -8,7 +8,7 @@ const calculate = (decimalPlaces: number): string => {
     return 'I LIKE PI';
 };
 
-parentPort.on('message', (decimalPlaces: number) => {
+parentPort?.on('message', (decimalPlaces: number) => {
     const pi = calculate(decimalPlaces);
-    parentPort.postMessage(pi);
+    parentPort?.postMessage(pi);
 });
