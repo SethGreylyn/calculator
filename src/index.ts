@@ -14,7 +14,7 @@ app.get('/', (_, res) => {
     res.send('Hallo Welt!');
 });
 
-app.get('/pi', (_, res) => {
+app.get('/pi', async (_, res) => {
     await piPool.run();
 });
 
