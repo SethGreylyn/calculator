@@ -5,7 +5,7 @@ if (isMainThread) {
 }
 
 const calculate = (decimalPlaces: number): string => {
-    return 'I LIKE PI';
+    return `I LIKE PI to ${decimalPlaces} decimal places`;
 };
 
 parentPort?.on('message', (decimalPlaces: number) => {

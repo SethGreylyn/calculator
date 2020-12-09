@@ -4,6 +4,8 @@ import { Worker } from 'worker_threads';
 
 const kWorkerFreedEvent = Symbol('kWorkerFreedEvent');
 
+type PoolCallback<Result> = (err: unknown, result: Result) => void;
+
 class FlexibleWorker<N> extends Worker {
     kTaskInfo?: WorkerPoolTaskInfo<N>;
 
@@ -13,7 +15,7 @@ class FlexibleWorker<N> extends Worker {
 }
 
 class WorkerPoolTaskInfo<N> extends AsyncResource {
-    constructor(private callback: () => void) {
+    constructor(private callback: PoolCallback<N>) {
         super('WorkerPoolTaskInfo');
     }
 
@@ -25,14 +27,14 @@ class WorkerPoolTaskInfo<N> extends AsyncResource {
 
 export class WorkerPool<T, N> extends EventEmitter {
     private workers: FlexibleWorker<N>[] = [];
-    constructor(private workerSource: string, private poolSize: number) {
+    constructor(private workerSource: string, poolSize: number) {
         super();
         this.workers = Array.from({ length: poolSize }).map(() =>
             this.addNewWorker()
         );
     }
 
-    addNewWorker(): FlexibleWorker<N> {
+    private addNewWorker(): FlexibleWorker<N> {
         const worker = new FlexibleWorker(this.workerSource);
         worker.on('message', (result) => {
             // In case of success: Call the callback that was passed to `runTask`,
@@ -56,11 +58,11 @@ export class WorkerPool<T, N> extends EventEmitter {
         return worker;
     }
 
-    getIdleWorker(): FlexibleWorker<N> | undefined {
+    private getIdleWorker(): FlexibleWorker<N> | undefined {
         return this.workers.filter(({ kTaskInfo }) => !kTaskInfo)[0];
     }
 
-    runTask(task: T, callback: () => void): void {
+    runTask(task: T, callback: PoolCallback<N>): void {
         const worker = this.getIdleWorker();
         if (!worker) {
             // No free threads, wait until a worker thread becomes free.
