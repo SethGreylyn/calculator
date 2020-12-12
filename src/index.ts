@@ -1,5 +1,5 @@
 import express from 'express';
-import { WorkerPool } from './workers/WokerPool';
+import { WorkerPool } from './workers/WorkerPool';
 
 const app = express();
 const port = 9001;

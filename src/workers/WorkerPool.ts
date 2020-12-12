@@ -1,29 +1,11 @@
-import { AsyncResource } from 'async_hooks';
 import { EventEmitter } from 'events';
-import { Worker } from 'worker_threads';
+import {
+    FlexibleWorker,
+    PoolCallback,
+    WorkerPoolTaskInfo,
+} from './FlexibleWorker';
 
 const kWorkerFreedEvent = Symbol('kWorkerFreedEvent');
-
-type PoolCallback<Result> = (err: unknown, result: Result) => void;
-
-class FlexibleWorker<N> extends Worker {
-    kTaskInfo?: WorkerPoolTaskInfo<N>;
-
-    constructor(source: string) {
-        super(source);
-    }
-}
-
-class WorkerPoolTaskInfo<N> extends AsyncResource {
-    constructor(private callback: PoolCallback<N>) {
-        super('WorkerPoolTaskInfo');
-    }
-
-    done(err: unknown, result: N) {
-        this.runInAsyncScope(this.callback, null, err, result);
-        this.emitDestroy(); // `TaskInfo`s are used only once.
-    }
-}
 
 export class WorkerPool<T, N> extends EventEmitter {
     private workers: FlexibleWorker<N>[] = [];
