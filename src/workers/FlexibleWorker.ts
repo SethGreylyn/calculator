@@ -10,14 +10,10 @@ export class WorkerPoolTaskInfo<N> extends AsyncResource {
 
     done(err: unknown, result: N): void {
         this.runInAsyncScope(this.callback, null, err, result);
-        this.emitDestroy(); // `TaskInfo`s are used only once.
+        this.emitDestroy();
     }
 }
 
 export class FlexibleWorker<N> extends Worker {
-    kTaskInfo?: WorkerPoolTaskInfo<N>;
-
-    constructor(source: string) {
-        super(source);
-    }
+    taskInfo?: WorkerPoolTaskInfo<N>;
 }

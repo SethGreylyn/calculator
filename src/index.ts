@@ -16,7 +16,7 @@ app.get('/', (_, res) => {
 app.get('/pi', (_, res) => {
     piPool.runTask(10, (err, result) => {
         if (err) {
-            throw new Error('ERROR');
+            throw err;
         }
         res.send(result);
     });
