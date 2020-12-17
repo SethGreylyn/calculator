@@ -1,3 +1,4 @@
+import e from 'express';
 import { isMainThread, parentPort } from 'worker_threads';
 
 if (isMainThread) {
@@ -14,12 +15,39 @@ const calculate = (decimalPlaces: number): string => {
     let nativePiArray = Array.from({ length: nativePiArrayLength }).map(
         () => 2
     );
+    let predigits: number[] = [];
+    const trueDigits: number[] = [];
 
     for (let i = 0; i < decimalPlaces; i++) {
         nativePiArray = nativePiArray.map((nativeDigit) => nativeDigit * 10);
+
+        for (let j = nativePiArrayLength - 1; j > 1; j--) {
+            const nativeEntry = nativePiArray[j];
+            const dividend = 2 * j - 1;
+            const remainder = nativeEntry % dividend;
+            const quotient = Math.floor(nativeEntry / dividend);
+            nativePiArray[j] = remainder;
+            nativePiArray[j - 1] = nativePiArray[j - 1] + quotient * (j - 1);
+        }
+
+        const predigitQuotient = nativePiArray[0] / 10;
+        const predigitRemainder = nativePiArray[0] % 10;
+
+        nativePiArray[0] = predigitRemainder;
+
+        if (predigitQuotient !== 9 && predigitQuotient !== 10) {
+            trueDigits.push(...predigits);
+            predigits = [predigitQuotient];
+        } else if (predigitQuotient === 9) {
+            predigits.push(predigitQuotient);
+        } else if (predigitQuotient === 10) {
+            predigits = predigits.map((predigit) => (predigit + 1) % 10);
+            trueDigits.push(...predigits);
+            predigits = [0];
+        }
     }
 
-    return `I LIKE PI to ${decimalPlaces} decimal places`;
+    return trueDigits.join('');
 };
 
 parentPort?.on('message', (decimalPlaces: number) => {
